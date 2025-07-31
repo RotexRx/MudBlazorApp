@@ -75,7 +75,8 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        {
+        { 
+
             isLoading = true;
             StateHasChanged();
             await LoadCategories();
