@@ -1,0 +1,114 @@
+﻿@page "/order/details/{Id:int}"
+@using System.Globalization
+@using MudBlazorApp.Utility
+@inject IOrderRepository orderRepository
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider _AuthenticationStateProvider
+
+@if (isProcessing)
+{
+    <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Style="width:150px;" Class="m-2 p-2" OnClick="@(() => NavigationManager.NavigateTo("/order/list"))">
+        Back
+    </MudButton>
+
+    <MudCard Class="m-5 mx-auto" Style="background-color: transparent; color: white; max-width: 700px;">
+        <MudCardContent>
+            <MudText Typo="Typo.subtitle1" Color="Color.Primary">Order Id: @OrderHeader?.Id</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Primary">Name: @OrderHeader?.Name</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Primary">Email: @OrderHeader?.Email</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Primary">Phone: @OrderHeader?.PhoneNumber</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Primary">Order Status: @OrderHeader?.Status</MudText>
+
+            <MudDivider Class="my-3" />
+
+            <MudText Typo="Typo.h6" Class="mb-2">Menu Items</MudText>
+
+            @foreach (var item in OrderHeader?.OrderDetails ?? Enumerable.Empty<OrderDetail>())
+            {
+                <MudGrid Class="mb-1" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudItem xs="5">
+                        <MudText Color="Color.Primary">@item.ProductName</MudText>
+                    </MudItem>
+                    <MudItem xs="4" Class="text-right">
+                        <MudText Color="Color.Primary">@($"{item.Price.ToString("C", CultureInfo.GetCultureInfo("en-us"))} x {item.Count}")</MudText>
+                    </MudItem>
+                    <MudItem xs="3" Class="text-right">
+                        <MudText Color="Color.Primary">@((item.Price * item.Count).ToString("C", CultureInfo.GetCultureInfo("en-us")))</MudText>
+                    </MudItem>
+                </MudGrid>
+            }
+
+            <MudDivider Class="my-3" />
+
+            <MudText Typo="Typo.subtitle1" Align="Align.Right" Color="Color.Primary">
+                Order Total: @OrderHeader?.OrderTotal.ToString("C", CultureInfo.GetCultureInfo("en-us"))
+            </MudText>
+
+            <MudGrid Class="mt-4" Justify="Justify.FlexStart" Spacing="2">
+                @if (OrderHeader?.Status != SD.StatusCancelled && OrderHeader?.Status != SD.StatusCompleted
+                            && _AuthenticationStateProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult().User?.IsInRole(SD.Role_Admin) == true)
+                {
+                    <MudItem>
+                        <MudButton Color="Color.Error" Variant="Variant.Filled" Style="width:150px;" OnClick="() => UpdateStatus(SD.StatusCancelled)">
+                            Cancelled
+                        </MudButton>
+                    </MudItem>
+                    @if (OrderHeader?.Status == SD.StatusPending)
+                    {
+                        <MudItem>
+                            <MudButton Color="Color.Primary" Variant="Variant.Filled" Style="width:150px;" OnClick="() => UpdateStatus(SD.StatusReadyForPickup)">
+                                Ready
+                            </MudButton>
+                        </MudItem>
+                    }
+                    @if (OrderHeader?.Status == SD.StatusReadyForPickup)
+                    {
+                        <MudItem>
+                            <MudButton Color="Color.Success" Variant="Variant.Filled" Style="width:150px;" OnClick="() => UpdateStatus(SD.StatusCompleted)">
+                                Completed
+                            </MudButton>
+                        </MudItem>
+                    }
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    private bool isProcessing { get; set; } = true;
+    public OrderHeader? OrderHeader = null;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadOrder();
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadOrder()
+    {
+        await Task.Delay(1);
+        OrderHeader = await orderRepository.GetAsync(Id);
+    }
+
+    private async Task UpdateStatus(string status)
+    {
+        await orderRepository.UpdateStatusAsync(Id, status);
+        // Optionally reload order after status update
+        await LoadOrder();
+        StateHasChanged();
+    }
+}

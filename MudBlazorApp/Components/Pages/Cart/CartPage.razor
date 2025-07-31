@@ -1,0 +1,144 @@
+﻿@page "/cart"
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider _AuthenticationStateProvider
+@inject IProductRepository _productRepository
+@inject ICartRepository _cartRepository
+@inject IOrderRepository _orderRepository
+@inject NavigationManager navigationManager
+@inject SweetAlertService AlertService
+@inject IJSRuntime JS
+
+@using System.Globalization
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazorApp.Utility
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    @if (isProcessing)
+    {
+        <div class="d-flex justify-center align-center" style="height:400px">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        </div>
+    }
+    else if (Carts.Any())
+    {
+        <MudGrid>
+            <MudItem xs="12" lg="6">
+                <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Cart Summary</MudText>
+
+                @foreach (var item in Carts)
+                {
+                    <MudCard Class="mb-4">
+                        <MudCardMedia Image="@item.Product.ImageUrl" Height="200" />
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle1">@item.Product.Name</MudText>
+                            <MudText Typo="Typo.subtitle2">@item.Product.Price $</MudText>
+                            <MudText Typo="Typo.body2">Total: @((item.Product.Price * item.Count).ToString("C", CultureInfo.GetCultureInfo("en-us")))</MudText>
+                            <MudText Typo="Typo.body2">Quantity: @item.Count</MudText>
+
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" JustifyContent="SpaceBetween" Class="mt-2">
+                                <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="@(() => UpdateCartItem(item.ProductId, -1))" />
+                                <MudText Typo="Typo.body1">@item.Count</MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="@(() => UpdateCartItem(item.ProductId, +1))" />
+                            </MudStack>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => UpdateCartItem(item.ProductId, -item.Count))">
+                                Remove
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                }
+            </MudItem>
+
+            <MudItem xs="12" lg="6">
+                <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Pickup Details</MudText>
+
+                <MudPaper Class="p-4">
+                    <EditForm Model="@OrderHeader" OnValidSubmit="HandleFormSubmit">
+                        <DataAnnotationsValidator />
+
+                        <MudTextField Label="Name" @bind-Value="OrderHeader.Name" Required="true" />
+                        <MudTextField Label="Email" @bind-Value="OrderHeader.Email" Required="true" />
+                        <MudTextField Label="Phone" @bind-Value="OrderHeader.PhoneNumber" Required="true" />
+
+                        <MudDivider Class="my-3" />
+
+                        <MudText Typo="Typo.subtitle1">Total: @OrderHeader.OrderTotal.ToString("C", CultureInfo.GetCultureInfo("en-us"))</MudText>
+                        <MudText Typo="Typo.subtitle2">Items: @TotalItems</MudText>
+
+                        <MudButton Type="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="mt-3">
+                            Place Order
+                        </MudButton>
+                    </EditForm>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true">
+            There is no product in your cart. Please add some products to your cart.
+        </MudAlert>
+    }
+</MudContainer>
+
+@code {
+    private bool isProcessing { get; set; } = true;
+    private IEnumerable<Cart> Carts = new List<Cart>();
+    [SupplyParameterFromForm]
+    private OrderHeader OrderHeader { get; set; } = new OrderHeader();
+    private int TotalItems { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        OrderHeader.Email = user?.FindFirst(u => u.Type.Contains("email"))?.Value;
+        OrderHeader.UserId = user?.FindFirst(u => u.Type.Contains("nameidentifier"))?.Value;
+        OrderHeader.Status = SD.StatusPending;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCart();
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCart()
+    {
+        Carts = await _cartRepository.GetAllAsync(OrderHeader.UserId);
+
+        OrderHeader.OrderTotal = 0;
+        TotalItems = 0;
+
+        foreach (var item in Carts)
+        {
+            OrderHeader.OrderTotal += (Convert.ToDouble(item.Product.Price) * item.Count);
+            TotalItems += item.Count;
+        }
+
+        OrderHeader.OrderTotal = Math.Round(OrderHeader.OrderTotal, 2);
+    }
+
+    private async Task UpdateCartItem(int productID, int updateBy)
+    {
+        await _cartRepository.UpdateCartAsync(OrderHeader.UserId, productID, updateBy);
+        await LoadCart();
+    }
+
+    private async Task HandleFormSubmit()
+    {
+        isProcessing = true;
+        StateHasChanged();
+
+        OrderHeader.OrderDetails = SD.ConvertShopingCartToOrderDetails(Carts.ToList());
+
+        var createdOrder = await _orderRepository.CreateAsync(OrderHeader);
+        navigationManager.NavigateTo($"/order/confirmation/{createdOrder.Id}");
+    }
+}

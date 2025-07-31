@@ -1,0 +1,69 @@
+﻿@page "/category/create"
+@page "/category/edit/{id:int}"
+@inject ICategoryRepository categoryRepository
+@inject NavigationManager NavigationManager
+@inject SweetAlertService AlertService
+@inject IJSRuntime JS
+
+<MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 600px;" Elevation="4">
+    @if (isLoading)
+    {
+        <div class="d-flex justify-center my-5">
+            <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@Category" OnValidSubmit="UpsertCategory">
+            <DataAnnotationsValidator />
+
+            <MudStack Spacing="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => NavigationManager.NavigateTo("/category"))">
+                    Back
+                </MudButton>
+
+                <MudTextField @bind-Value="Category.Name" Label="Category Name" For="@(() => Category.Name)" Required="true" Immediate="true" />
+                <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-n2">@(string.IsNullOrWhiteSpace(Category.Name) ? "Category name is required" : "")</MudText>
+
+                <MudSpacer />
+
+                
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-3">@(Id > 0 ? "Edit" : "Create")</MudButton>
+
+            </MudStack>
+        </EditForm>
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private bool isLoading { get; set; } = true;
+    private EditForm form;
+    private Category Category { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            Category = await categoryRepository.Get(Id);
+        }
+        isLoading = false;
+    }
+
+    private async Task UpsertCategory()
+    {
+        if (Id > 0)
+        {
+            await categoryRepository.Update(Category);
+            await AlertService.ShowSuccess("Success", "Category updated successfully!");
+        }
+        else
+        {
+            await categoryRepository.Create(Category);
+            await AlertService.ShowSuccess("Success", "Category added successfully!");
+        }
+
+        NavigationManager.NavigateTo("/category");
+    }
+}

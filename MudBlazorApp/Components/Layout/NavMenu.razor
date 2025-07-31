@@ -1,0 +1,70 @@
+﻿@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<MudDrawer Elevation="1" Open="true" Variant="DrawerVariant.Mini" Class="mud-width-260">
+    <MudNavMenu Dense="true">
+
+        <AuthorizeView>
+            <Authorized>
+                <MudNavLink Href="" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">
+                    خانه
+                </MudNavLink>
+
+                <MudNavLink Href="category" Icon="@Icons.Material.Filled.Category">
+                    لیست دسته‌بندی
+                </MudNavLink>
+
+                <MudNavLink Href="products" Icon="@Icons.Material.Filled.ShoppingBag">
+                    لیست محصولات
+                </MudNavLink>
+
+                <MudNavLink Href="cart" Icon="@Icons.Material.Filled.ShoppingCart">
+                    سبد خرید
+                </MudNavLink>
+
+                <MudNavLink Href="order/list" Icon="@Icons.Material.Filled.ReceiptLong">
+                    سفارشات
+                </MudNavLink>
+
+                <MudNavLink Href="Account/Manage" Icon="@Icons.Material.Filled.Person">
+                    @context.User.Identity?.Name
+                </MudNavLink>
+
+                <MudNavLink Href="Account/Logout" Icon="@Icons.Material.Filled.Logout">
+                    خروج
+                </MudNavLink>
+            </Authorized>
+
+            <NotAuthorized>
+                <MudNavLink Href="Account/Register" Icon="@Icons.Material.Filled.PersonAdd">
+                    ثبت‌نام
+                </MudNavLink>
+                <MudNavLink Href="Account/Login" Icon="@Icons.Material.Filled.Login">
+                    ورود
+                </MudNavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+
+    </MudNavMenu>
+</MudDrawer>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

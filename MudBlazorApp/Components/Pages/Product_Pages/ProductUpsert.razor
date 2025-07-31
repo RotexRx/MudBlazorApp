@@ -1,0 +1,187 @@
+﻿@page "/products/create"
+@page "/products/edit/{Id:int}"
+@inject IProductRepository productRepository
+@inject ICategoryRepository categoryRepository
+@inject SweetAlertService AlertService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+@if (isLoading)
+{
+    <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudPaper Class="p-4" Style="background-color:#212529; color:white;">
+        <MudStack Direction="Row" Justify="Justify.Center" Class="mb-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => NavigationManager.NavigateTo("/products"))">
+                Back to Products
+            </MudButton>
+        </MudStack>
+
+        @if (!string.IsNullOrEmpty(Product.ImageUrl))
+        {
+            <div class="text-center mb-3">
+                <img src="@Product.ImageUrl" class="img-thumbnail" style="max-height: 200px;" alt="Product image" />
+            </div>
+        }
+
+        
+
+        <EditForm Model="Product" OnValidSubmit="UpsertProduct">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid>
+                <MudItem xs="12">
+                    <InputFile OnChange="OnFileUpload" />
+                    @if (string.IsNullOrEmpty(Product.ImageUrl))
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Error">Product image is required</MudText>
+                    }
+                    @if (_isImageLoading)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Info">Uploading image...</MudText>
+                    }
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Product.Name" Label="Product Name" Required="true" For="@(() => Product.Name)" FullWidth="true" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="Product.Price" Label="Product Price" Required="true" For="@(() => Product.Price)" FullWidth="true" Min="0" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="Product.Quantity" Label="Product Quantity" Required="true" For="@(() => Product.Quantity)" FullWidth="true" Min="0" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Product.Description" Label="Product Description" FullWidth="true" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Product.SpecialTag" Label="Product Special Tag" FullWidth="true" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="int" Label="Category" @bind-Value="Product.CategoryId" Required="true" For="@(() => Product.CategoryId)" FullWidth="true">
+                        @foreach (var category in Categories)
+                        {
+                            <MudSelectItem Value="category.Id">@category.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudStack Direction="Row" Justify="Justify.FlexEnd" Class="mt-4">
+              
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="isLoading" Class="mt-3">@(Id > 0 ? "Update Product" : "Create Product")</MudButton>
+
+            </MudStack>
+        </EditForm>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private bool isLoading { get; set; } = true;
+    private bool _isImageLoading { get; set; } = false;
+
+    private Product Product { get; set; } = new();
+    private IEnumerable<Category> Categories { get; set; } = Enumerable.Empty<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadProduct();
+            Categories = await categoryRepository.GetAll();
+        }
+        catch (Exception ex)
+        {
+            await AlertService.ShowError("Error", $"Failed to load data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadProduct()
+    {
+        if (Id > 0)
+        {
+            Product = await productRepository.Get(Id) ?? new Product();
+        }
+        else
+        {
+            Product = new Product
+            {
+                ImageUrl = "https://via.placeholder.com/150",
+                Price = 0
+            };
+        }
+    }
+
+    private async Task UpsertProduct()
+    {
+        try
+        {
+            isLoading = true;
+
+            if (Id > 0)
+            {
+                await productRepository.Update(Product);
+                await AlertService.ShowSuccess("Success", "Product updated successfully!");
+            }
+            else
+            {
+                await productRepository.Create(Product);
+                await AlertService.ShowSuccess("Success", "Product created successfully!");
+            }
+
+            NavigationManager.NavigateTo("products");
+        }
+        catch (Exception ex)
+        {
+            await AlertService.ShowError("Error", $"Failed to save product: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnFileUpload(InputFileChangeEventArgs e)
+    {
+        _isImageLoading = true;
+
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var base64 = Convert.ToBase64String(ms.ToArray());
+                Product.ImageUrl = $"data:{file.ContentType};base64,{base64}";
+            }
+        }
+        catch (Exception ex)
+        {
+            await AlertService.ShowError("Error", $"Image upload failed: {ex.Message}");
+        }
+        finally
+        {
+            _isImageLoading = false;
+            StateHasChanged();
+        }
+    }
+}

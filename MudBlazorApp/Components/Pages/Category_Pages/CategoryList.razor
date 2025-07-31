@@ -1,0 +1,86 @@
+﻿@page "/category"
+@inject ICategoryRepository categoryRepository
+@inject NavigationManager NavigationManager
+@inject SweetAlertService AlertService
+@inject IJSRuntime JS
+
+@if (isLoading)
+{
+    <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
+        <img src="images/loading.gif" alt="loading" />
+    </div>
+}
+else
+{
+    <MudPaper Class="shadow border-0 mt-4" Elevation="2">
+        <MudPaper Class="bg-dark p-4">
+            <MudStack Direction="Row" Justify="Justify.FlexStart" Class="pb-3">
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => NavigationManager.NavigateTo("/category/create"))">
+                    Create New
+                </MudButton>
+            </MudStack>
+
+            @if (categories?.Any() == true)
+            {
+                <MudTable Items="categories" Dense="true" Hover="true" Bordered="true" Class="overflow-auto">
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.Id</MudTd>
+                        <MudTd DataLabel="Name">@context.Name</MudTd>
+                        <MudTd DataLabel="Actions">
+                            <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => HandleRemoveCategory(context.Id))" Class="mr-2">
+                                Delete
+                            </MudButton>
+                            <MudButton Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => NavigationManager.NavigateTo($"category/edit/{context.Id}"))">
+                                Edit
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
+                    No Categories Found
+                </MudAlert>
+            }
+        </MudPaper>
+    </MudPaper>
+}
+
+@code {
+    private CategoryInputModel CategoryModel { get; set; } = new();
+    private bool isLoading { get; set; } = true;
+    private IEnumerable<Category>? categories;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCategories();
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleRemoveCategory(int id)
+    {
+        var category = await categoryRepository.Get(id);
+        if (category != null)
+        {
+            await categoryRepository.Delete(id);
+            await LoadCategories();
+            await AlertService.ShowSuccess("Success", "Category deleted successfully!");
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        await Task.Delay(1);
+        categories = await categoryRepository.GetAll();
+    }
+}

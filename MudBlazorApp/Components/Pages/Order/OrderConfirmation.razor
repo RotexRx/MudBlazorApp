@@ -1,0 +1,31 @@
+﻿@page "/order/confirmation/{orderId}"
+
+@if (isProcessing)
+{
+	<div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
+		<img src="images/loading.gif" alt="loading" />
+	</div>
+}
+else
+{
+	<div class="text-center text-white mt-5">
+		<MudText Typo="Typo.h4" Class="mb-4">You are one step closer to the delicious food</MudText>
+
+		<MudAlert Severity="Severity.Success" Elevation="4" Dense="true" Variant="Variant.Filled" Class="text-white">
+			Your order is submitted, please note your order id for any questions -
+			<strong> Order Id: @orderId</strong>
+		</MudAlert>
+	</div>
+}
+
+@code {
+	private bool isProcessing = false;
+
+	[Parameter]
+	public string? orderId { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		isProcessing = false;
+	}
+}

@@ -1,0 +1,108 @@
+﻿@page "/order/list"
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazorApp.Utility
+@using System.Security.Claims
+@inject IOrderRepository orderRepository
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+@if (isLoading)
+{
+    <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudPaper Elevation="1" Class="mt-4 p-4" Style="background-color: #212529; color: white;">
+        @if (OrderHeaders?.Any() == true)
+        {
+            <MudTable Items="OrderHeaders" Dense="true" Hover="true" Bordered="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Phone Number</MudTh>
+                    <MudTh>Email</MudTh>
+                    <MudTh>Order Date</MudTh>
+                    <MudTh>Order Total</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.Id</MudTd>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Phone Number">@context.PhoneNumber</MudTd>
+                    <MudTd DataLabel="Email">@context.Email</MudTd>
+                    <MudTd DataLabel="Order Date">@context.OrderDate.ToString("dd/MM/yyyy")</MudTd>
+                    <MudTd DataLabel="Order Total">@context.OrderTotal.ToString("C")</MudTd>
+                    <MudTd DataLabel="Status">@context.Status</MudTd>
+                    <MudTd>
+                        <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => NavigationManager.NavigateTo($"/order/details/{context.Id}"))">
+                            Details
+                        </MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Elevation="0" Dense="true" DisableElevation="true" Class="mt-4">
+                No Orders Found
+            </MudAlert>
+        }
+    </MudPaper>
+}
+
+@code {
+
+    private CategoryInputModel CategoryModel { get; set; } = new();
+
+    private bool isLoading { get; set; } = true;
+
+    private IEnumerable<OrderHeader>? OrderHeaders;
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private bool? IsAdmin { get; set; }
+    private string? UserId { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadOrders();
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadOrders()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        await CheckAuth();
+        if (IsAdmin == true)
+        {
+            OrderHeaders = await orderRepository.GetAllAsync();
+        }
+        else
+        {
+            OrderHeaders = await orderRepository.GetAllAsync(UserId);
+        }
+        isLoading = false;
+    }
+
+    private async Task CheckAuth()
+    {
+        if (AuthenticationState is not null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+            var adminRole = SD.Role_Admin;
+            IsAdmin = user?.IsInRole(adminRole);
+            UserId = user?.FindFirst(u => u.Type.Contains(ClaimTypes.NameIdentifier))?.Value;
+        }
+    }
+}

@@ -1,0 +1,143 @@
+﻿@page "/"
+@inject IProductRepository prodRepo
+@inject ICategoryRepository categoryRepository
+@inject ICartRepository _cartRepository
+@inject AuthenticationStateProvider _AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@inject SweetAlertService AlertService
+@inject IJSRuntime JS
+
+@if (isLoading)
+{
+    <div class="d-flex flex-column align-items-center justify-content-center" style="height: 70vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" Thickness="6" />
+        <MudText Typo="Typo.subtitle1" Class="mt-2">در حال بارگذاری...</MudText>
+    </div>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.False" Class="px-0 mx-0">
+        <MudStack Spacing="2" Class="my-3 px-2">
+
+            <MudText Typo="Typo.h6" Color="Color.Primary">انتخاب دسته بندی</MudText>
+
+            <MudStack Direction="Row" Spacing="1" JustifyContent="Center" AlignItems="AlignItems.Center" Class="flex-wrap">
+
+                @foreach (var item in categories)
+                {
+                    <MudButton Variant="Variant.Filled" Color="@(currentCategory.Name == item.Name ? Color.Primary : Color.Default)" Disabled="@isLoading" OnClick="@(() => ChangeCategory(item.Name))">
+                        @item.Name
+                    </MudButton>
+                }
+            </MudStack>
+
+            <MudDivider />
+
+            <MudText Typo="Typo.h6" Color="Color.Primary" Class="mt-4">لیست محصولات</MudText>
+
+            <MudGrid Class="mt-3" GutterSize="3">
+                @foreach (var item in products)
+                {
+                    @if (item.Category == currentCategory)
+                    {
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudCard Outlined="true" Style="max-width: 420px; margin: auto;">
+                                <MudStack Direction="Row" Spacing="2" Class="p-4" AlignItems="AlignItems.Center">
+                                    <MudAvatar Size="Size.Large" Src="@item.ImageUrl" Alt="@item.Name" Class="mud-border-radius-circle" />
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.overline" Color="Color.Secondary">نام</MudText>
+                                        <MudText Typo="Typo.body1" Class="font-weight-bold">@($"{item.Name} - ({item.Quantity})")</MudText>
+                                        <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mt-3">قیمت</MudText>
+                                        <MudText Typo="Typo.body1" Class="font-weight-bold">@($"{item.Price} $")</MudText>
+                                    </MudStack>
+                                </MudStack>
+
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" StartIcon="@Icons.Material.Filled.ShoppingCart" OnClick="@(() => PlaceOrder(item))">
+                                        افزودن به سبد خرید
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                    }
+                }
+            </MudGrid>
+        </MudStack>
+    </MudContainer>
+}
+
+@code {
+    private bool isLoading { get; set; } = true;
+    private IEnumerable<Product> products { get; set; } = new List<Product>();
+    private IEnumerable<Category> categories { get; set; } = new List<Category>();
+    private Category currentCategory { get; set; } = new Category();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            await LoadCategories();
+            await LoadProducts();
+
+            currentCategory = categories.FirstOrDefault() ?? new Category();
+
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+
+        categories = await categoryRepository.GetAll();
+    }
+
+    private async Task LoadProducts()
+    {
+        products = await prodRepo.GetAll();
+    }
+
+    private async Task ChangeCategory(string categoryName)
+    {
+        if (string.IsNullOrEmpty(categoryName) || categories == null || !categories.Any())
+            return;
+
+        var selectedCategory = categories.FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+        if (selectedCategory != null && selectedCategory != currentCategory)
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            currentCategory = selectedCategory;
+            await LoadProducts();
+
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task PlaceOrder(Product product)
+    {
+        var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var authenticated = user.Identity != null && user.Identity.IsAuthenticated;
+
+        if (!authenticated)
+        {
+            navigationManager.NavigateTo("Account/Login");
+        }
+        else
+        {
+            await AlertService.ShowSuccess("موفقیت", "سفارش شما ثبت شد!");
+
+            var userId = user.FindFirst(u => u.Type.Contains("nameidentifier"))?.Value;
+            if (userId != null)
+            {
+                await _cartRepository.UpdateCartAsync(userId, product.Id, 1);
+            }
+        }
+    }
+}
