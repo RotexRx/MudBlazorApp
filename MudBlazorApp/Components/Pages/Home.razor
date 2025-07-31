@@ -72,6 +72,7 @@ else
     private IEnumerable<Category> categories { get; set; } = new List<Category>();
     private Category currentCategory { get; set; } = new Category();
 
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
