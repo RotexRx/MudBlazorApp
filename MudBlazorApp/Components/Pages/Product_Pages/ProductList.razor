@@ -4,69 +4,92 @@
 @inject SweetAlertService AlertService
 @inject IJSRuntime JS
 
-@if (isLoading)
-{
-    <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
-        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-    </div>
-}
-else
-{
-    <MudPaper Elevation="1" Class="mt-4 p-4" Style="background-color: #212529; color: white;">
-        <MudStack Direction="Row" Justify="Justify.FlexStart" Class="mb-3">
-            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => NavigationManager.NavigateTo("/products/create"))">
-                Create New
-            </MudButton>
-        </MudStack>
 
-        @if (products?.Any() == true)
+
+    <MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 600px;" Elevation="4">
+    <MudContainer Class="mt-3" MaxWidth="MaxWidth.Medium">
+
+
+        @if (isLoading)
         {
-            <MudTable Items="products" Dense="true" Hover="true" Bordered="true" Elevation="0">
-                <HeaderContent>
-                    <MudTh>ID</MudTh>
-                    <MudTh>Name</MudTh>
-                    <MudTh>Price</MudTh>
-                    <MudTh>Description</MudTh>
-                    <MudTh>Special Tag</MudTh>
-                    <MudTh>Image</MudTh>
-                    <MudTh>Actions</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="ID">@context.Id</MudTd>
-                    <MudTd DataLabel="Name">@context.Name</MudTd>
-                    <MudTd DataLabel="Price">@context.Price</MudTd>
-                    <MudTd DataLabel="Description">@context.Description</MudTd>
-                    <MudTd DataLabel="Special Tag">@context.SpecialTag</MudTd>
-                    <MudTd DataLabel="Image">
-                        @if (!string.IsNullOrEmpty(context.ImageUrl))
-                        {
-                            <img src="@context.ImageUrl" alt="Product Image" style="max-height: 60px; max-width: 60px;" />
-                        }
-                        else
-                        {
-                            <span class="text-muted">No Image</span>
-                        }
-                    </MudTd>
-                    <MudTd DataLabel="Actions">
-                        <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => HandleRemoveProduct(context.Id))" Class="me-2">
-                            Delete
-                        </MudButton>
-                        <MudButton Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => NavigationManager.NavigateTo($"products/edit/{context.Id}"))">
-                            Edit
-                        </MudButton>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
+            <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
         }
         else
         {
-            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Elevation="0" Dense="true" DisableElevation="true" Class="mt-4">
-                No Products Found
-            </MudAlert>
-        }
-    </MudPaper>
-}
+            <MudContainer Class="mt-5" MaxWidth="MaxWidth.Small">
 
+                <MudStack Direction="Row" Justify="Justify.FlexStart" Class="mb-3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => NavigationManager.NavigateTo("/products/create"))">
+                        ساخت محصول جدید
+                    </MudButton>
+                </MudStack>
+
+                <MudPaper Class="shadow border-0 mt-4" Elevation="2">
+                    <MudPaper Class="bg-dark p-4">
+
+
+                        @if (products?.Any() == true)
+                        {
+
+                            <MudTable Items="products">
+
+                                <HeaderContent>
+                                    <MudTh>#</MudTh>
+                                    <MudTh>نام محصول</MudTh>
+                                    <MudTh>قیمت</MudTh>
+                                    <MudTh>توضیحات</MudTh>
+                                    <MudTh>تگ</MudTh>
+                                    <MudTh>عکس</MudTh>
+                                    <MudTh>عمل ها</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="ID">@context.Id</MudTd>
+                                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                                    <MudTd DataLabel="Price">@context.Price</MudTd>
+                                    <MudTd DataLabel="Description">@context.Description</MudTd>
+                                    <MudTd DataLabel="Special Tag">@context.SpecialTag</MudTd>
+                                    <MudTd DataLabel="Image">
+                                        @if (!string.IsNullOrEmpty(context.ImageUrl))
+                                        {
+                                            <img src="@context.ImageUrl" alt="Product Image" style="max-height: 60px; max-width: 60px;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">بدون عکس</span>
+                                        }
+                                    </MudTd>
+                                    <MudTd DataLabel="Actions">
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => HandleRemoveProduct(context.Id))" Class="me-2">
+                                            حذف
+                                        </MudButton>
+                                        <MudButton Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => NavigationManager.NavigateTo($"products/edit/{context.Id}"))">
+                                            ویرایش
+                                        </MudButton>
+                                    </MudTd>
+                                </RowTemplate>
+
+                            </MudTable>
+
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
+                                محصولی یافت نشد
+                            </MudAlert>
+                        }
+                    </MudPaper>
+                </MudPaper>
+            </MudContainer>
+
+        }
+
+    </MudContainer>
+    </MudPaper>
+  
+
+  
 @code {
     private bool isLoading { get; set; } = true;
     public IEnumerable<Product> products { get; set; } = new List<Product>();
@@ -88,13 +111,12 @@ else
         {
             await prodRepo.Delete(id);
             await LoadProducts();
-            await AlertService.ShowSuccess("Success", "Product deleted successfully!");
+            await AlertService.ShowSuccess("موفقت آمیز", "محصول با موفقیت حذف شد!");
         }
     }
 
     private async Task LoadProducts()
     {
-        await Task.Delay(1);
         products = await prodRepo.GetAll();
     }
 }

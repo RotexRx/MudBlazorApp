@@ -5,35 +5,41 @@
 @inject SweetAlertService AlertService
 @inject IJSRuntime JS
 
-<MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 600px;" Elevation="4">
-    @if (isLoading)
-    {
-        <div class="d-flex justify-center my-5">
-            <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
-        </div>
-    }
-    else
-    {
-        <EditForm Model="@Category" OnValidSubmit="UpsertCategory">
-            <DataAnnotationsValidator />
 
-            <MudStack Spacing="2">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo("/category"))">
-                    بازگشت به لیست دسته بندی ها
-                </MudButton>
+    <MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 600px;" Elevation="4">
+    <MudContainer Class="mt-3" MaxWidth="MaxWidth.Medium">
 
-                <MudTextField @bind-Value="Category.Name" Label="نام دسته بندی" For="@(() => Category.Name)" Required="true" Immediate="true" />
-                <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-n2">@(string.IsNullOrWhiteSpace(Category.Name) ? "نام دسته بندی اجباری است" : "")</MudText>
+    
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center my-5">
+                <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+            </div>
+        }
+        else
+        {
+            <EditForm Model="@Category" OnValidSubmit="UpsertCategory">
+                <DataAnnotationsValidator />
 
-                <MudSpacer />
+                <MudStack Spacing="2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo("/category"))">
+                        بازگشت به لیست دسته بندی ها
+                    </MudButton>
 
-                
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="mt-3">@(Id > 0 ? "ویرایش" : "ساخت")</MudButton>
+                    <MudTextField @bind-Value="Category.Name" Label="نام دسته بندی" For="@(() => Category.Name)" Required="true" Immediate="true" />
+                    <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-n2">@(string.IsNullOrWhiteSpace(Category.Name) ? "نام دسته بندی اجباری است" : "")</MudText>
 
-            </MudStack>
-        </EditForm>
-    }
-</MudPaper>
+                    <MudSpacer />
+
+
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="mt-3">@(Id > 0 ? "ویرایش" : "ساخت")</MudButton>
+
+                </MudStack>
+            </EditForm>
+        }
+    </MudContainer>
+
+    </MudPaper>
 
 @code {
     [Parameter]

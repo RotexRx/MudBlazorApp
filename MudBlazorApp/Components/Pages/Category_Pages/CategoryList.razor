@@ -3,7 +3,8 @@
 @inject NavigationManager NavigationManager
 @inject SweetAlertService AlertService
 @inject IJSRuntime JS
-
+<MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 900px;" Elevation="4">
+		<MudContainer Class="mt-3" MaxWidth="MaxWidth.Medium">
 @if (isLoading)
 {
     <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
@@ -15,7 +16,7 @@ else
 
     
 
-    <MudContainer Class="mt-5" MaxWidth="MaxWidth.Small">
+    <MudContainer Class="mt-5">
 
         <MudStack Direction="Row" Justify="Justify.FlexStart" Class="pb-3">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo("/category/create"))">
@@ -64,6 +65,10 @@ else
     </MudContainer>
    
 }
+    </MudContainer>
+</MudPaper>
+
+
 
 @code {
     private CategoryInputModel CategoryModel { get; set; } = new();

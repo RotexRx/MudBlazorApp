@@ -14,76 +14,78 @@
 }
 else
 {
-    <MudPaper Class="p-4" Style="background-color:#212529; color:white;">
-        <MudStack Direction="Row" Justify="Justify.Center" Class="mb-3">
-            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => NavigationManager.NavigateTo("/products"))">
-                Back to Products
-            </MudButton>
-        </MudStack>
-
-        @if (!string.IsNullOrEmpty(Product.ImageUrl))
-        {
-            <div class="text-center mb-3">
-                <img src="@Product.ImageUrl" class="img-thumbnail" style="max-height: 200px;" alt="Product image" />
-            </div>
-        }
-
-        
-
-        <EditForm Model="Product" OnValidSubmit="UpsertProduct">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <MudGrid>
-                <MudItem xs="12">
-                    <InputFile OnChange="OnFileUpload" />
-                    @if (string.IsNullOrEmpty(Product.ImageUrl))
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Error">Product image is required</MudText>
-                    }
-                    @if (_isImageLoading)
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Info">Uploading image...</MudText>
-                    }
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Product.Name" Label="Product Name" Required="true" For="@(() => Product.Name)" FullWidth="true" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudNumericField @bind-Value="Product.Price" Label="Product Price" Required="true" For="@(() => Product.Price)" FullWidth="true" Min="0" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudNumericField @bind-Value="Product.Quantity" Label="Product Quantity" Required="true" For="@(() => Product.Quantity)" FullWidth="true" Min="0" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Product.Description" Label="Product Description" FullWidth="true" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Product.SpecialTag" Label="Product Special Tag" FullWidth="true" />
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="int" Label="Category" @bind-Value="Product.CategoryId" Required="true" For="@(() => Product.CategoryId)" FullWidth="true">
-                        @foreach (var category in Categories)
-                        {
-                            <MudSelectItem Value="category.Id">@category.Name</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-            </MudGrid>
-
-            <MudStack Direction="Row" Justify="Justify.FlexEnd" Class="mt-4">
-              
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="isLoading" Class="mt-3">@(Id > 0 ? "Update Product" : "Create Product")</MudButton>
-
+     <MudContainer Class="mt-5" MaxWidth="MaxWidth.Small">
+          <MudStack Direction="Row" Justify="Justify.Center" Class="mb-3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo("/products"))">
+                بازگشت به لیست محصولات
+                </MudButton>
             </MudStack>
-        </EditForm>
-    </MudPaper>
+
+        <MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 600px;" Elevation="4">
+           
+            @if (!string.IsNullOrEmpty(Product.ImageUrl))
+            {
+                <div class="text-center mb-3">
+                    <img src="@Product.ImageUrl" class="img-thumbnail" style="max-height: 200px;" alt="عکس محصول" />
+                </div>
+            }
+
+            <EditForm Model="Product" OnValidSubmit="UpsertProduct">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <MudGrid>
+                    <MudItem xs="12">
+                        <InputFile OnChange="OnFileUpload" />
+                        @if (string.IsNullOrEmpty(Product.ImageUrl))
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Error">لطفا برای محصول یک عکس انتخاب کنید</MudText>
+                        }
+                        @if (_isImageLoading)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Info">درحال آپلود عکس</MudText>
+                        }
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="Product.Name" Label="نام محصول" Required="true" For="@(() => Product.Name)" FullWidth="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="Product.Price" Label="قیمت محصول" Required="true" For="@(() => Product.Price)" FullWidth="true" Min="0" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="Product.Quantity" Label="تعداد محصول" Required="true" For="@(() => Product.Quantity)" FullWidth="true" Min="0" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="Product.Description" Label="توضیحات محصول" FullWidth="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="Product.SpecialTag" Label="تگ محصول" FullWidth="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="دسته بندی" @bind-Value="Product.CategoryId" Required="true" For="@(() => Product.CategoryId)" FullWidth="true">
+                            @foreach (var category in Categories)
+                            {
+                                <MudSelectItem Value="category.Id">@category.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+
+                <MudStack Direction="Row" Justify="Justify.FlexEnd" Class="mt-4">
+
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Disabled="isLoading" Class="mt-3">@(Id > 0 ? "ویرایش محصول" : "ساخت محصول")</MudButton>
+
+                </MudStack>
+            </EditForm>
+        </MudPaper>
+     </MudContainer>
+    
 }
 
 @code {
@@ -122,7 +124,7 @@ else
         {
             Product = new Product
             {
-                ImageUrl = "https://via.placeholder.com/150",
+                ImageUrl = "",
                 Price = 0
             };
         }
