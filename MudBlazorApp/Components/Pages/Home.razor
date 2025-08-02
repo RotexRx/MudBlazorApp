@@ -16,16 +16,16 @@
 }
 else
 {
-    <MudContainer MaxWidth="MaxWidth.False" Class="px-0 mx-0">
-        <MudStack Spacing="2" Class="my-3 px-2">
+    <MudContainer MaxWidth="MaxWidth.False" Class="p-5 mx-0">
+        <MudStack Spacing="2" Class="my-3 px-2 p-4" Justify="Justify.Center">
 
-            <MudText Typo="Typo.h6" Color="Color.Primary">انتخاب دسته بندی</MudText>
+            <MudText Typo="Typo.h6" Color="Color.Primary"> دسته بندی ها</MudText>
 
-            <MudStack Direction="Row" Spacing="1" JustifyContent="Center" AlignItems="AlignItems.Center" Class="flex-wrap">
+            <MudStack Row="true" Spacing="1" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="flex-wrap">
 
                 @foreach (var item in categories)
                 {
-                    <MudButton Variant="Variant.Filled" Color="@(currentCategory.Name == item.Name ? Color.Primary : Color.Default)" Disabled="@isLoading" OnClick="@(() => ChangeCategory(item.Name))">
+                    <MudButton Variant="Variant.Filled" Color="@(currentCategory.Name == item.Name ? Color.Primary : Color.Dark)" Disabled="@isLoading" OnClick="@(() => ChangeCategory(item.Name))">
                         @item.Name
                     </MudButton>
                 }

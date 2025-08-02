@@ -5,3 +5,36 @@
     src: url('vazir.ttf');
 }
 
+/* اصلاح موقعیت Drawer در راست‌چین */
+/*.mud-drawer.mud-drawer-right {
+    right: 0;
+    left: auto;
+}*/
+
+/* اصلاح margin و عرض AppBar وقتی Drawer باز است */
+/*.mud-drawer-open.mud-drawer-right ~ .mud-appbar {
+    margin-right: var(--mud-drawer-width);
+    margin-left: 0;
+    width: calc(100% - var(--mud-drawer-width));
+}*/
+
+/* اصلاح انیمیشن بسته شدن */
+/*.mud-drawer.mud-drawer-right.mud-drawer--closed {
+    transform: translateX(100%);
+}*/
+
+
+/* وقتی Drawer سمت راست و باز است */
+/*.mud-drawer-open.mud-drawer-right ~ .mud-main-content,
+.mud-drawer-open.mud-drawer-right ~ .main-content {
+    margin-right: var(--mud-drawer-width);
+    margin-left: 0;
+    transition: margin 0.3s ease;
+}*/
+
+/* وقتی Drawer بسته است */
+/*.mud-main-content,
+.main-content {
+    margin-right: 0;
+    transition: margin 0.3s ease;
+}*/

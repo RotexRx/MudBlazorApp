@@ -1,12 +1,12 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
 
-<MudDrawer Elevation="1" Open="true" Variant="DrawerVariant.Mini" Class="mud-width-260">
-    <MudNavMenu Dense="true">
+<MudDrawer  Elevation="1" Open="true" Variant="DrawerVariant.Mini" Class="mud-width-260">
+    <MudNavMenu  Bordered="true" Margin="Margin.Dense" Color="Color.Primary" Dense="true">
 
         <AuthorizeView>
             <Authorized>
-                <MudNavLink Href="" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">
+                <MudNavLink   Href="" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">
                     خانه
                 </MudNavLink>
 
@@ -39,7 +39,7 @@
                 <MudNavLink Href="Account/Register" Icon="@Icons.Material.Filled.PersonAdd">
                     ثبت‌نام
                 </MudNavLink>
-                <MudNavLink Href="Account/Login" Icon="@Icons.Material.Filled.Login">
+                <MudNavLink Href="Account/Login" Icon="@Icons.Material.Filled.Login" Style="color: #ff0000;">
                     ورود
                 </MudNavLink>
             </NotAuthorized>

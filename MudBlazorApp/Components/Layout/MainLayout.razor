@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JS
 
-<MudThemeProvider Theme="MyCustomTheme"/>
+<MudThemeProvider Theme="currentTheme"/>
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -8,17 +9,23 @@
     
 <MudLayout >
     <MudAppBar Elevation="1">
-        <MudStaticNavDrawerToggle DrawerId="nav-drawer" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
-        <MudText Typo="Typo.h5" Class="ml-3">پروژه دمو</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent Class="pt-16 pa-4">
-        @Body
-    </MudMainContent>
+    <MudStaticNavDrawerToggle DrawerId="nav-drawer" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" />
+    <MudText Typo="Typo.h5" Class="mr-3">پروژه دمو</MudText>
+    <MudSpacer />
+    <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.Start" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleTheme">
+    تغییر تم
+</MudButton>
+</MudAppBar>
+
+<MudDrawer Anchor="Anchor.Right" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Id="nav-drawer">
+    <NavMenu />
+</MudDrawer>
+
+<MudMainContent>
+    @Body
+</MudMainContent>
+
 </MudLayout>
 </MudRTLProvider>
 
@@ -32,9 +39,48 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+    MudTheme currentTheme;
+    private bool _needChangeBodyColor = false;
 
-    MudTheme MyCustomTheme = new MudTheme()
+    
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_needChangeBodyColor)
+        {
+            _needChangeBodyColor = false;
+            var bgColor = _isDarkMode ? "#32333d" : "#ffffff";
+            await JS.InvokeVoidAsync("setBodyBackgroundColor", bgColor);
+        }
+    }
+
+    private async Task SetBodyBackground(string color)
+    {
+        await JS.InvokeVoidAsync("setBodyBackgroundColor", color);
+    }
+
+    async Task ToggleTheme()
+    {
+        _isDarkMode = !_isDarkMode;
+        currentTheme = _isDarkMode ? darkTheme : lightTheme;
+        _needChangeBodyColor = true;
+        StateHasChanged();
+    }
+
+    MudTheme lightTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Black = "#272c34",
+            Background = "#ffffff",
+            Surface = "#ffffff",
+            DrawerBackground = "#ffffff",
+            AppbarBackground = "#1976d2",
+            TextPrimary = "#000000",
+            Primary = "#1976d2",
+            Secondary = "#9c27b0"
+        },
         Typography = new Typography()
         {
             Default = new DefaultTypography()
@@ -43,6 +89,33 @@
             }
         }
     };
+
+    MudTheme darkTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Black = "#27272f",
+            Background = "#32333d",
+            Surface = "#373740",
+            DrawerBackground = "#27272f",
+            AppbarBackground = "#27272f",
+            TextPrimary = "#ffffff",
+            Primary = "#90caf9",
+            Secondary = "#ce93d8",
+            Dark = "#000000",
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Vazir" }
+            }
+        }
+    };
+    
+      
+
+    
 
 }
 
