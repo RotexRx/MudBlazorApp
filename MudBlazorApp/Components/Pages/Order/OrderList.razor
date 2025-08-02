@@ -5,7 +5,8 @@
 @inject IOrderRepository orderRepository
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
-
+<MudPaper Class="pa-6 mx-auto mt-5" Style="max-width: 900px;" Elevation="4">
+    <MudContainer Class="mt-3" MaxWidth="MaxWidth.Medium">
 @if (isLoading)
 {
     <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center justify-content-center">
@@ -52,6 +53,8 @@ else
         }
     </MudPaper>
 }
+   </MudContainer>
+</MudPaper>
 
 @code {
 
