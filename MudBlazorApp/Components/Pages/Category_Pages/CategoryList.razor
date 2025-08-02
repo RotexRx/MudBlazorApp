@@ -12,44 +12,57 @@
 }
 else
 {
-    <MudPaper Class="shadow border-0 mt-4" Elevation="2">
-        <MudPaper Class="bg-dark p-4">
-            <MudStack Direction="Row" Justify="Justify.FlexStart" Class="pb-3">
-                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => NavigationManager.NavigateTo("/category/create"))">
-                    Create New
-                </MudButton>
-            </MudStack>
 
-            @if (categories?.Any() == true)
-            {
-                <MudTable Items="categories" Dense="true" Hover="true" Bordered="true" Class="overflow-auto">
-                    <HeaderContent>
-                        <MudTh>ID</MudTh>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Actions</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd DataLabel="ID">@context.Id</MudTd>
-                        <MudTd DataLabel="Name">@context.Name</MudTd>
-                        <MudTd DataLabel="Actions">
-                            <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => HandleRemoveCategory(context.Id))" Class="mr-2">
-                                Delete
-                            </MudButton>
-                            <MudButton Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => NavigationManager.NavigateTo($"category/edit/{context.Id}"))">
-                                Edit
-                            </MudButton>
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
-            }
-            else
-            {
-                <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
-                    No Categories Found
-                </MudAlert>
-            }
+    
+
+    <MudContainer Class="mt-5" MaxWidth="MaxWidth.Small">
+
+        <MudStack Direction="Row" Justify="Justify.FlexStart" Class="pb-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo("/category/create"))">
+                ساخت دسته بندی جدید
+            </MudButton>
+        </MudStack>
+
+        <MudPaper Class="shadow border-0 mt-4" Elevation="2">
+            <MudPaper Class="bg-dark p-4">
+                
+
+                @if (categories?.Any() == true)
+                {
+
+                    <MudTable Items="categories">
+              
+                        <HeaderContent>
+                            <MudTh Style="text-align:center">#</MudTh>
+                            <MudTh Style="text-align:center">نام</MudTh>
+                            <MudTh Style="text-align:center">عمل ها</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd Style="text-align:center" DataLabel="ID">@context.Id</MudTd>
+                            <MudTd Style="text-align:center" DataLabel="Name">@context.Name</MudTd>
+                            <MudTd Style="text-align:center" DataLabel="Actions">
+                                <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => HandleRemoveCategory(context.Id))" Class="mr-2">
+                                    حذف
+                                </MudButton>
+                                <MudButton Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => NavigationManager.NavigateTo($"category/edit/{context.Id}"))">
+                                    ویرایش
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                        
+                    </MudTable>
+
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
+                        No Categories Found
+                    </MudAlert>
+                }
+            </MudPaper>
         </MudPaper>
-    </MudPaper>
+    </MudContainer>
+   
 }
 
 @code {

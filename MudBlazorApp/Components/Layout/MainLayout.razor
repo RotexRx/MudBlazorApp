@@ -14,8 +14,11 @@
     <MudSpacer />
     <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.Start" />
     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleTheme">
-    تغییر تم
-</MudButton>
+        <MudIcon Class="mx-2" Icon="@(_isDarkMode?Icons.Material.Filled.LightMode:Icons.Material.Filled.DarkMode)" Title="Favorite" />
+
+        تغییر تم به
+        @(!_isDarkMode?"دارک":"لایت")
+    </MudButton>
 </MudAppBar>
 
 <MudDrawer Anchor="Anchor.Right" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Id="nav-drawer">
@@ -41,30 +44,17 @@
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
     MudTheme currentTheme;
-    private bool _needChangeBodyColor = false;
 
-    
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (_needChangeBodyColor)
-        {
-            _needChangeBodyColor = false;
-            var bgColor = _isDarkMode ? "#32333d" : "#ffffff";
-            await JS.InvokeVoidAsync("setBodyBackgroundColor", bgColor);
-        }
+       currentTheme = _isDarkMode ? darkTheme : lightTheme;    
     }
 
-    private async Task SetBodyBackground(string color)
-    {
-        await JS.InvokeVoidAsync("setBodyBackgroundColor", color);
-    }
 
     async Task ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
         currentTheme = _isDarkMode ? darkTheme : lightTheme;
-        _needChangeBodyColor = true;
         StateHasChanged();
     }
 

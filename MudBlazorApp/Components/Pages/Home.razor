@@ -40,24 +40,21 @@ else
                 {
                     @if (item.Category == currentCategory)
                     {
-                        <MudItem xs="12" sm="6" md="4">
-                            <MudCard Outlined="true" Style="max-width: 420px; margin: auto;">
-                                <MudStack Direction="Row" Spacing="2" Class="p-4" AlignItems="AlignItems.Center">
-                                    <MudAvatar Size="Size.Large" Src="@item.ImageUrl" Alt="@item.Name" Class="mud-border-radius-circle" />
-                                    <MudStack Spacing="0">
-                                        <MudText Typo="Typo.overline" Color="Color.Secondary">نام</MudText>
-                                        <MudText Typo="Typo.body1" Class="font-weight-bold">@($"{item.Name} - ({item.Quantity})")</MudText>
-                                        <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mt-3">قیمت</MudText>
-                                        <MudText Typo="Typo.body1" Class="font-weight-bold">@($"{item.Price} $")</MudText>
-                                    </MudStack>
-                                </MudStack>
 
+
+                        <MudItem xs="12" sm="6" md="3">
+
+                            <MudCard>
+                                <MudCardMedia Image="@item.ImageUrl" Height="200" />
+                                <MudCardContent>
+                                    <MudText Typo="Typo.h5"> نام : @($"{item.Name} - ({item.Quantity})") </MudText>
+                                    <MudText Typo="Typo.body2">قیمت : @($"{item.Price} $")</MudText>
+                                </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" StartIcon="@Icons.Material.Filled.ShoppingCart" OnClick="@(() => PlaceOrder(item))">
-                                        افزودن به سبد خرید
-                                    </MudButton>
+                                    <MudButton DropShadow="true" OnClick="@(() => PlaceOrder(item))" style="width:100%;" Variant="Variant.Filled" Color="Color.Success">افزودن به سبد خرید</MudButton>
                                 </MudCardActions>
                             </MudCard>
+
                         </MudItem>
                     }
                 }
@@ -76,7 +73,7 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        { 
+        {
 
             isLoading = true;
             StateHasChanged();

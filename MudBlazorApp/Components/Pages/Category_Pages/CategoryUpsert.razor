@@ -18,17 +18,17 @@
             <DataAnnotationsValidator />
 
             <MudStack Spacing="2">
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => NavigationManager.NavigateTo("/category"))">
-                    Back
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo("/category"))">
+                    بازگشت به لیست دسته بندی ها
                 </MudButton>
 
-                <MudTextField @bind-Value="Category.Name" Label="Category Name" For="@(() => Category.Name)" Required="true" Immediate="true" />
-                <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-n2">@(string.IsNullOrWhiteSpace(Category.Name) ? "Category name is required" : "")</MudText>
+                <MudTextField @bind-Value="Category.Name" Label="نام دسته بندی" For="@(() => Category.Name)" Required="true" Immediate="true" />
+                <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-n2">@(string.IsNullOrWhiteSpace(Category.Name) ? "نام دسته بندی اجباری است" : "")</MudText>
 
                 <MudSpacer />
 
                 
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-3">@(Id > 0 ? "Edit" : "Create")</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="mt-3">@(Id > 0 ? "ویرایش" : "ساخت")</MudButton>
 
             </MudStack>
         </EditForm>
