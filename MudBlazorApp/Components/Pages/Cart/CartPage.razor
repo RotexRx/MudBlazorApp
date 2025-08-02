@@ -109,14 +109,22 @@
         }
     }
 
-<<<<<<< HEAD
 
     private async Task LoadCart()
     {
         Carts = await _cartRepository.GetAllAsync(OrderHeader.UserId);
-=======
->>>>>>> master
 
+        OrderHeader.OrderTotal = 0;
+        TotalItems = 0;
+
+        foreach (var item in Carts)
+        {
+            OrderHeader.OrderTotal += (Convert.ToDouble(item.Product.Price) * item.Count);
+            TotalItems += item.Count;
+        }
+
+        OrderHeader.OrderTotal = Math.Round(OrderHeader.OrderTotal, 2);
+    }
 
     private async Task UpdateCartItem(int productID, int updateBy)
     {
