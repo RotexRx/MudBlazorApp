@@ -20,13 +20,13 @@ else
         {
             <MudTable Items="OrderHeaders" Dense="true" Hover="true" Bordered="true" Elevation="0">
                 <HeaderContent>
-                    <MudTh>ID</MudTh>
-                    <MudTh>Name</MudTh>
-                    <MudTh>Phone Number</MudTh>
-                    <MudTh>Email</MudTh>
-                    <MudTh>Order Date</MudTh>
-                    <MudTh>Order Total</MudTh>
-                    <MudTh>Status</MudTh>
+                    <MudTh>#</MudTh>
+                    <MudTh>نام</MudTh>
+                    <MudTh>تلفن همراه </MudTh>
+                    <MudTh>ایمیل</MudTh>
+                    <MudTh>تاریخ سفارش</MudTh>
+                    <MudTh>مجموع سفارش</MudTh>
+                    <MudTh>وضعیت</MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
@@ -39,7 +39,7 @@ else
                     <MudTd DataLabel="Status">@context.Status</MudTd>
                     <MudTd>
                         <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => NavigationManager.NavigateTo($"/order/details/{context.Id}"))">
-                            Details
+                            جزئیات
                         </MudButton>
                     </MudTd>
                 </RowTemplate>
